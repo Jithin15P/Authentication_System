@@ -18,7 +18,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5000",
   process.env.CLIENT_URL
-];
+].filter(Boolean);
 
 app.use(cors({
   origin: allowedOrigins,
@@ -37,7 +37,19 @@ app.use("/api/auth", authRoutes);
         res.sendFile(path.join(__dirname, "frontend", "dist", "index.html"));
     });
 }
-app.listen(PORT, () => {
-	connectDB();
-	console.log("Server is running on port: ", PORT);
-});
+
+const startServer = async () => {
+    try {
+        await connectDB(); // wait for DB connection
+
+        app.listen(PORT, () => {
+            console.log("Server is running on port:", PORT);
+        });
+
+    } catch (error) {
+        console.error("Database connection failed:", error);
+        process.exit(1); // exit process if DB fails
+    }
+};
+
+startServer();
